@@ -1,0 +1,152 @@
+DROP TABLE owners;
+
+CREATE TABLE owners(
+    id INTEGER PRIMARY KEY,
+    name TEXT,
+    address TEXT,
+    email TEXT,
+    phone INTEGER
+);
+
+CREATE TABLE pets(
+    id INTEGER PRIMARY KEY,
+    owner_id INTEGER,
+    name TEXT,
+    birthdate DATETIME,
+    breed TEXT,
+    favorite_treats TEXT,
+    last_fed_at DATETIME,
+    last_walked_at DATETIME,
+        FOREIGN KEY (owner_id) REFERENCES owners(id)
+);
+
+-- Modify pets table
+
+    -- Add new column
+ALTER TABLE pets
+ADD COLUMN image_url TEXT;
+
+    -- Rename column
+ALTER TABLE pets
+RENAME COLUMN birthdate TO age;
+
+-- Create new instances
+
+INSERT INTO owners(name, address, email, phone)
+VALUES ('louis', '123 Street', 'myemail@gmail.com', 5555555555);
+
+INSERT INTO owners(name, address, email, phone)
+VALUES ('sally', '456 Street', 'myotheremail@gmail.com', 4444444444);
+
+INSERT INTO pets(name, age, breed, favorite_treats, image_url, owner_id) 
+VALUES ('Luke', '2', 'domestic longhair', 'bacon', 'https://res.cloudinary.com/dnocv6uwb/image/upload/v1631229064/zx6CPsp_d_utkmww.webp', 2);
+
+INSERT INTO pets(name, age, breed, favorite_treats, image_url, owner_id) 
+VALUES ('rose', '11', 'domestic longhair', 'house plants', 'https://res.cloudinary.com/dnocv6uwb/image/upload/v1631229038/EEE90-E50-25-F0-4-DF0-98-B2-0-E0-B6-F9-BAA89_menwgg.jpg', 1);
+
+INSERT INTO pets(name, age, breed, favorite_treats, image_url, owner_id) 
+VALUES ('leia', '2', 'domestic Shorthair', 'bacon', 'https://res.cloudinary.com/dnocv6uwb/image/upload/v1631229011/8136c615d670e214f80de4e7fcdf8607--cattle-dogs-mans_vgyqqa.jpg', 2);
+
+INSERT INTO pets(name, age, breed, favorite_treats, image_url, owner_id) 
+VALUES ('Chop', '5', 'shiba inu', 'cheese', 'https://res.cloudinary.com/dnocv6uwb/image/upload/v1629822267/cdbd77592e3ef91e8cc1cf67d936f94f_fkozjt.jpg', 1);
+
+
+-- CRUD actions
+
+    -- Read data
+
+    SELECT * FROM pets
+    WHERE name='rose';
+
+    SELECT * FROM pets
+    WHERE favorite_treats = 'bacon';
+
+    SELECT * FROM pets
+    WHERE age > 5;
+
+    -- Update data
+
+        -- Updates all pets with the name rose
+    UPDATE pets
+    SET age = 12
+    WHERE name='rose';
+
+        -- Update all pets in general
+    UPDATE pets
+    SET favorite_treats = 'cheese';
+
+    -- Delete data
+    DELETE FROM pets
+    WHERE name='luke';
+
+-- One to many
+
+SELECT pets.name as 'pet', owners.name as 'owner'
+FROM pets
+JOIN owners
+ON pets.owner_id = owners.id
+
+-- MANY TO MANY
+
+CREATE TABLE handlers(
+    id INTEGER PRIMARY KEY,
+    name TEXT,
+    email TEXT,
+    phone INTEGER
+);
+
+CREATE TABLE appointments(
+    id INTEGER PRIMARY KEY,
+    time DATETIME,
+    request TEXT,
+    pet_id INTEGER,
+    handler_id INTEGER,
+    FOREIGN KEY (pet_id) REFERENCES pets(id),
+    FOREIGN KEY (handler_id) REFERENCES handlers(id)
+);
+
+    -- Seed data
+
+INSERT INTO handlers(name, email, phone)
+VALUES ('jacob', 'jacob@gmail.com', 1111111111);
+
+INSERT INTO handlers(name, email, phone)
+VALUES ('samantha', 'samantha@gmail.com', 2222222222);
+
+INSERT INTO handlers(name, email, phone)
+VALUES ('bill', 'bill@gmail.com', 3333333333);
+
+INSERT INTO appointments(time, request, pet_id, handler_id)
+VALUES ('2023-02-27 00:00:00', 'drop-in', 1, 1);
+
+INSERT INTO appointments(time, request, pet_id, handler_id)
+VALUES ('2023-06-21 00:00:00', 'drop-in', 1, 3);
+
+INSERT INTO appointments(time, request, pet_id, handler_id)
+VALUES ('2023-07-17 00:00:00', 'drop-in', 1, 1);
+
+INSERT INTO appointments(time, request, pet_id, handler_id)
+VALUES ('2023-09-19 00:00:00', 'drop-in', 2, 2);
+
+    -- Read data
+
+SELECT pets.name as 'pet', handlers.name as 'handler', appointments.request, appointments.time
+FROM appointments
+JOIN pets
+    ON appointments.pet_id = pets.id
+JOIN handlers
+    ON appointments.handler_id = handlers.id
+
+SELECT DISTINCT pets.name, handlers.name
+FROM appointments
+JOIN pets
+    ON appointments.pet_id = pets.id
+JOIN handlers
+    ON appointments.handler_id = handlers.id
+WHERE pets.name = 'Luke'
+AND handlers.name = 'jacob';
+-- cannot use WHERE more than once
+
+
+
+
